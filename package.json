@@ -1,0 +1,20 @@
+{
+  "name": "vcr-datamatrix-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "toni.kuschan@vonage.com",
+  "license": "ISC",
+  "dependencies": {
+    "@vonage/vcr-sdk": "^1.2.0-rc1",
+    "axios": "^1.5.1",
+    "dynamsoft-node-barcode": "^8.8.7",
+    "express": "^4.18.2",
+    "nodemon": "^3.0.1"
+  }
+}

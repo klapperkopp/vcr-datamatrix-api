@@ -1,0 +1,26 @@
+project:
+  name: vcr-datamatrix-api
+instance:
+  name: dev
+  runtime: nodejs16
+  region: aws.euw1
+  application-id: your_app_id
+  capabilities:
+    - messages-v1
+  environment:
+    - name: "ZENDESK_BASE_URL"
+      value: "https://your_zendesk_instance_name.zendesk.com"
+    - name: "ZENDESK_USERNAME"
+      value: "email@example.com"
+    - name: "ZENDESK_TOKEN"
+      secret: "ZENDESK_TOKEN"
+  secrets:
+    - ZENDESK_TOKEN
+  entrypoint:
+    - npm
+    - start
+debug:
+  name: vcr-front-callbacks-debug
+  entrypoint:
+    - npm
+    - start
