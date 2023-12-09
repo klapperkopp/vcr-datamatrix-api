@@ -14,13 +14,27 @@ instance:
       value: "email@example.com"
     - name: "ZENDESK_TOKEN"
       secret: "ZENDESK_TOKEN"
+    - name: "INTERNAL_API_KEY"
+      secret: "INTERNAL_API_KEY"
+    - name: "DEBUG_ZENDESK_BASE_URL"
+      value: "https://vonage1950.zendesk.com"
+    - name: "DEBUG_ZENDESK_USERNAME"
+      value: "toni.kuschan+zendesk2@vonage.com"
+    - name: "DEBUG_ZENDESK_TOKEN"
+      secret: "DEBUG_ZENDESK_TOKEN"
+    - name: "DEBUG_INTERNAL_API_KEY"
+      secret: "DEBUG_INTERNAL_API_KEY"
   secrets:
     - ZENDESK_TOKEN
+    - INTERNAL_API_KEY
+    - DEBUG_ZENDESK_TOKEN
+    - DEBUG_INTERNAL_API_KEY
   entrypoint:
     - npm
     - start
 debug:
-  name: vcr-front-callbacks-debug
+  name: vcr-datamatrix-api-debug
   entrypoint:
     - npm
-    - start
+    - run
+    - start-debug
