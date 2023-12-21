@@ -24,11 +24,16 @@ instance:
       secret: "DEBUG_ZENDESK_TOKEN"
     - name: "DEBUG_INTERNAL_API_KEY"
       secret: "DEBUG_INTERNAL_API_KEY"
+    - name: "AI_STUDIO_AGENT_ID"
+      value: "xxx"
+    - name: "AI_STUDIO_API_KEY"
+      secret: "AI_STUDIO_API_KEY"
   secrets:
     - ZENDESK_TOKEN
     - INTERNAL_API_KEY
     - DEBUG_ZENDESK_TOKEN
     - DEBUG_INTERNAL_API_KEY
+    - AI_STUDIO_API_KEY
   entrypoint:
     - npm
     - start

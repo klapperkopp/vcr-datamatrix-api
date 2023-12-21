@@ -132,3 +132,4 @@ dist
 
 vcr*.yaml
 
+.DS_Store

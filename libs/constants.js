@@ -12,6 +12,7 @@ export const ZENDESK_USERNAME =
     : process.env.ZENDESK_USERNAME;
 
 export const APP_URL = process.env.VCR_INSTANCE_PUBLIC_URL;
+export const AI_STUDIO_AGENT_ID = process.env.AI_STUDIO_AGENT_ID;
 
 // secrets
 export const INTERNAL_API_KEY =
@@ -19,6 +20,13 @@ export const INTERNAL_API_KEY =
     ? process.env.DEBUG_INTERNAL_API_KEY
     : process.env.INTERNAL_API_KEY;
 
+export const AI_STUDIO_API_KEY = process.env.AI_STUDIO_API_KEY;
+
 export const ZENDESK_BASE64_AUTH = Buffer.from(
   `${ZENDESK_USERNAME}/token:${ZENDESK_TOKEN}`
 ).toString("base64");
+
+// ai studio
+export const AI_STUDIO_AUTH_URL = "https://stairway.ai.vonage.com";
+export const AI_STUDIO_OUTBOUND_API_URL =
+  "https://studio-api-eu.ai.vonage.com/messaging/conversation";
