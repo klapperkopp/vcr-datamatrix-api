@@ -28,6 +28,8 @@ instance:
       value: "xxx"
     - name: "AI_STUDIO_API_KEY"
       secret: "AI_STUDIO_API_KEY"
+    - name: "DYNAMSOFT_LICENSE"
+      value: ""
   secrets:
     - ZENDESK_TOKEN
     - INTERNAL_API_KEY

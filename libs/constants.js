@@ -30,3 +30,6 @@ export const ZENDESK_BASE64_AUTH = Buffer.from(
 export const AI_STUDIO_AUTH_URL = "https://stairway.ai.vonage.com";
 export const AI_STUDIO_OUTBOUND_API_URL =
   "https://studio-api-eu.ai.vonage.com/messaging/conversation";
+
+// reader license
+export const DYNAMSOFT_LICENSE = process.env.DYNAMSOFT_LICENSE;

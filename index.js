@@ -10,7 +10,17 @@ import {
   AI_STUDIO_API_KEY,
 } from "./libs/constants.js";
 import { handleStudioAuth } from "./middleware/auth.js";
-import { uploadAttachmentFromUrl } from "./libs/zendeskHelper.js";
+import {
+  getImageStream,
+  uploadAttachmentFromUrl,
+} from "./libs/zendeskHelper.js";
+import {
+  getBarcodeTasksDynamsoft,
+  getBarcodeTasksWechatQr,
+  getBarcodeTasksZxing,
+  getBarcodeTasksBoofCV,
+} from "./libs/barcodeHelper.js";
+
 import { generateStudioJwt } from "./libs/aiStudio.js";
 import { handleErrorResponse } from "./libs/errors.js";
 
@@ -65,8 +75,14 @@ app.post("/zendesk/upload", handleStudioAuth, async (req, res) => {
   const { url } = req.body;
   console.log("url: ", url);
 
+  const imageDownloadResponse = await getImageStream(url);
+
   // Try to upload the received Whatsapp image to Zendesk
-  const response = await uploadAttachmentFromUrl(url);
+  const response = await uploadAttachmentFromUrl(url, imageDownloadResponse);
+  const filename = response?.data?.upload?.attachment?.file_name;
+
+  console.log("getting barcode tasks: ", filename);
+  const { tasks, formattedTasks } = await getBarcodeTasksDynamsoft(url);
 
   // Check if the response contains a Zendesk upload token
   let token = response?.data?.upload?.token || null;
@@ -77,7 +93,7 @@ app.post("/zendesk/upload", handleStudioAuth, async (req, res) => {
   }
 
   // Return Zendesk token if it was found
-  return res.status(201).json({ success: true, token });
+  return res.status(201).json({ success: true, token, tasks, formattedTasks });
 });
 
 /*
