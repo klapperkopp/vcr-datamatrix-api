@@ -138,9 +138,13 @@ app.post(
           },
         }
       );
-      console.log(
-        "Zendesk ticket creation response received: ",
-        ticketResponse.data
+
+      console.info(
+        `[i] Zendesk ticket creation status: ${ticketResponse.status}`
+      );
+      console.info(
+        "[i] Zendesk ticket ID: ",
+        ticketResponse?.data?.ticket?.id || null
       );
 
       // Return the direct response from Zendesk API without any additions
