@@ -39,6 +39,7 @@ instance:
   entrypoint:
     - npm
     - start
+  build-script: ./build.sh
 debug:
   name: vcr-datamatrix-api-debug
   entrypoint:
