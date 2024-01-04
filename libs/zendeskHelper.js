@@ -75,6 +75,7 @@ export async function uploadAttachmentFromUrl(
       },
     });
 
+    console.info(`[i] Zendesk Upload Status: ${uploadResponse.status}.`);
     console.log("Zendesk Upload Response: ", uploadResponse.data);
     return uploadResponse;
   } catch (error) {

@@ -82,7 +82,7 @@ app.post("/zendesk/upload", handleStudioAuth, async (req, res) => {
   const response = await uploadAttachmentFromUrl(url, imageDownloadResponse);
   const filename = response?.data?.upload?.attachment?.file_name;
 
-  console.log("getting barcode tasks: ", filename);
+  console.info(`[i] Getting barcode tasks for file ${filename}.`);
   const { tasks, formattedTasks } = await getBarcodeTasksDynamsoftNew(url);
 
   // Check if the response contains a Zendesk upload token
@@ -198,6 +198,6 @@ app.post("/studio/whatsapp/send", handleStudioAuth, async (req, res) => {
 
 // Run the server
 app.listen(PORT, () => {
-  console.log(`Server running on: ${APP_URL}`);
-  console.log(`Local url: http://localhost:${PORT}`);
+  console.info(`[i] Server running on: ${APP_URL}`);
+  console.info(`[i] Local url: http://localhost:${PORT}`);
 });

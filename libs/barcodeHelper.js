@@ -87,12 +87,11 @@ export const getBarcodeTasksDynamsoft = async (barcodeUrl) => {
   let results;
   try {
     // init barcode reader
-    console.log("Init reader...");
+    console.info("[i] Init barcode reader...");
     let reader = await DBR.BarcodeReader.createInstance();
     // decode barcode
-    console.log("Decoding barcode...");
+    console.info("[i] Decoding barcode...");
     results = await reader.decode(`${barcodeUrl}`);
-    console.log(results);
   } catch (e) {
     console.error("Barcode reading error: ", e);
     return;
@@ -135,12 +134,11 @@ export const getBarcodeTasksWechatQr = async (barcodeUrl, filename) => {
   try {
     await downloadFile(barcodeUrl, path)
       .then(async (result) => {
-        console.log("Downloaded file: ", result);
+        console.info(`[i] Downloaded file ${filename}.`);
         if (result !== true) return;
         //read file
         try {
           //const data = fs.readFileSync(path);
-          //console.log(data);
 
           const image = sharp(path); // or Buffer, anything sharp supports
 
@@ -182,7 +180,7 @@ export const getBarcodeTasksZxing = async (barcodeUrl, filename) => {
   try {
     await downloadFile(barcodeUrl, path)
       .then(async (result) => {
-        console.log("Downloaded file: ", result);
+        console.info(`[i] Downloaded file ${filename}.`);
         if (result !== true) return;
         //read file
         try {
@@ -245,7 +243,7 @@ export const getBarcodeTasksBoofCV = async (barcodeUrl, filename) => {
   try {
     await downloadFile(barcodeUrl, path)
       .then(async (result) => {
-        console.log("Downloaded file: ", result);
+        console.info(`[i] Downloaded file ${filename}.`);
         if (result !== true) return;
         //read file
         try {
