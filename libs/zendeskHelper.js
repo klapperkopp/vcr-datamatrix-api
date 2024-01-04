@@ -19,30 +19,6 @@ export async function getImageStream(url) {
   }
 }
 
-export async function getImageBuffer(url) {
-  try {
-    const imageDownloadResponse = await axios.get(url, {
-      responseType: "arraybuffer",
-      maxContentLength: Infinity,
-      maxBodyLength: Infinity,
-    });
-    console.info("[i] Received image file stream in memory.");
-    const image = sharp(imageDownloadResponse.data); // or Buffer, anything sharp supports
-
-    const { data } = await image
-      // .resize(1000) // you can resize first to improve the performance
-      .ensureAlpha()
-      .raw()
-      .toBuffer({
-        resolveWithObject: true,
-      });
-    return data.buffer;
-  } catch (e) {
-    console.error("Image download error: ", e.message);
-    return null;
-  }
-}
-
 export async function getImageBase64(url) {
   return await axios
     .get(url, {

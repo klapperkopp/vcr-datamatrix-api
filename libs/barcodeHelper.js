@@ -1,8 +1,8 @@
 //import DBR from "dynamsoft-node-barcode";
 import DBR from "barcode4nodejs";
 import { downloadFile } from "./imageHelper.js";
-import { scan } from "qr-scanner-wechat";
-import sharp from "sharp";
+//import { scan } from "qr-scanner-wechat";
+//import sharp from "sharp";
 import {
   MultiFormatReader,
   BarcodeFormat,
@@ -134,6 +134,7 @@ export const getBarcodeTasksDynamsoft = async (barcodeUrl) => {
 };
 
 // wechat qr scanner
+/*
 export const getBarcodeTasksWechatQr = async (barcodeUrl, filename) => {
   const path = `./temp/${filename}`;
   try {
@@ -178,6 +179,7 @@ export const getBarcodeTasksWechatQr = async (barcodeUrl, filename) => {
     return;
   }
 };
+*/
 
 // zxing
 export const getBarcodeTasksZxing = async (barcodeUrl, filename) => {

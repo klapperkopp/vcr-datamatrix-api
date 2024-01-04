@@ -6,13 +6,22 @@ function puts(error, stdout, stderr) {
 }
 
 const commands_linux = [
-  "npm install --cpu=x64 --os=linux sharp",
-  "npm install --cpu=x64 --os=linux --libc=musl sharp",
+  /*
+  "npm install --include=optional sharp",
+  "npm install --os=linux --cpu=x64 sharp",
+  //"npm install --cpu=x64 --os=linux --libc=musl sharp",
+  "npm install --force @img/sharp-linux-x64",
+  */
 ];
 
 const commands_darwin = [
+  /*
+  "npm install --include=optional sharp",
   "npm install --cpu=x64 --os=darwin sharp",
   "npm install --cpu=arm64 --os=darwin sharp",
+  "npm install --force @img/sharp-darwin-x64",
+  "npm install --force @img/sharp-darwin-arm64",
+  */
 ];
 
 const commands_windows = [];
