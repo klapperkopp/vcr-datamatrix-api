@@ -8,18 +8,22 @@ import {
   AI_STUDIO_OUTBOUND_API_URL,
   AI_STUDIO_AGENT_ID,
   AI_STUDIO_API_KEY,
+  DEBUG,
 } from "./libs/constants.js";
 import { handleStudioAuth } from "./middleware/auth.js";
 import {
   getImageStream,
   uploadAttachmentFromUrl,
 } from "./libs/zendeskHelper.js";
-import {
-  getBarcodeTasksDynamsoftNew,
-} from "./libs/barcodeHelper.js";
+import { getBarcodeTasksDynamsoftNew } from "./libs/barcodeHelper.js";
 
 import { generateStudioJwt } from "./libs/aiStudio.js";
 import { handleErrorResponse } from "./libs/errors.js";
+
+// remove logging if debug is off
+if (DEBUG != "true") {
+  console.log = function () {};
+}
 
 // create express application
 const app = express();
