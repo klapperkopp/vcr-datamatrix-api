@@ -16,6 +16,7 @@ import {
 } from "./libs/zendeskHelper.js";
 import {
   getBarcodeTasksDynamsoft,
+  getBarcodeTasksDynamsoftNew,
   getBarcodeTasksWechatQr,
   getBarcodeTasksZxing,
   getBarcodeTasksBoofCV,
@@ -82,7 +83,7 @@ app.post("/zendesk/upload", handleStudioAuth, async (req, res) => {
   const filename = response?.data?.upload?.attachment?.file_name;
 
   console.log("getting barcode tasks: ", filename);
-  const { tasks, formattedTasks } = await getBarcodeTasksDynamsoft(url);
+  const { tasks, formattedTasks } = await getBarcodeTasksDynamsoftNew(url);
 
   // Check if the response contains a Zendesk upload token
   let token = response?.data?.upload?.token || null;

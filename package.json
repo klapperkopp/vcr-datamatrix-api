@@ -12,9 +12,10 @@
   "author": "toni.kuschan@vonage.com",
   "license": "ISC",
   "dependencies": {
+    "@img/sharp-darwin-arm64": "^0.33.1",
     "@zxing/library": "^0.20.0",
     "axios": "^1.5.1",
-    "barcode4nodejs": "^9.6.29",
+    "barcode4nodejs": "^9.6.30",
     "dynamsoft-node-barcode": "^8.8.7",
     "express": "^4.18.2",
     "mime": "^4.0.0",
