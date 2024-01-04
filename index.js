@@ -15,11 +15,7 @@ import {
   uploadAttachmentFromUrl,
 } from "./libs/zendeskHelper.js";
 import {
-  getBarcodeTasksDynamsoft,
   getBarcodeTasksDynamsoftNew,
-  getBarcodeTasksWechatQr,
-  getBarcodeTasksZxing,
-  getBarcodeTasksBoofCV,
 } from "./libs/barcodeHelper.js";
 
 import { generateStudioJwt } from "./libs/aiStudio.js";
