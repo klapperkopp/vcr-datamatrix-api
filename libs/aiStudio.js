@@ -24,8 +24,8 @@ export const generateStudioJwt = async () => {
     // return token
     return token;
   } catch (e) {
-    console.log("generateStudioJwt error:");
-    console.log({
+    console.error("generateStudioJwt error:");
+    console.error({
       message: e.message,
       status: e.response.status,
     });

@@ -13,9 +13,7 @@ import {
 } from "@zxing/library";
 import pqrs from "pqrs-js";
 import { DYNAMSOFT_LICENSE } from "./constants.js";
-import {
-  getImageBase64
-} from "./zendeskHelper.js";
+import { getImageBase64 } from "./zendeskHelper.js";
 import { dbrParams } from "./dbrConfig.js";
 
 const barcodeTypes = DBR.barcodeTypes;
@@ -189,7 +187,6 @@ export const getBarcodeTasksZxing = async (barcodeUrl, filename) => {
         //read file
         try {
           //const data = fs.readFileSync(path);
-          //console.log(data);
 
           const image = sharp(path); // or Buffer, anything sharp supports
 
@@ -253,7 +250,6 @@ export const getBarcodeTasksBoofCV = async (barcodeUrl, filename) => {
         //read file
         try {
           //const data = fs.readFileSync(path);
-          //console.log(data);
 
           const image = sharp(path); // or Buffer, anything sharp supports
 
