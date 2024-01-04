@@ -14,10 +14,7 @@ import {
 import pqrs from "pqrs-js";
 import { DYNAMSOFT_LICENSE } from "./constants.js";
 import {
-  getImageBase64,
-  getImageBuffer,
-  getImageStream,
-  getImageStreamInfo,
+  getImageBase64
 } from "./zendeskHelper.js";
 import { dbrParams } from "./dbrConfig.js";
 
