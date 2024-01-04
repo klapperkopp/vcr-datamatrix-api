@@ -5,6 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "postinstall": "node ./scripts/postinstall.cjs",
     "start": "node index.js",
     "start-debug": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,7 +13,6 @@
   "author": "toni.kuschan@vonage.com",
   "license": "ISC",
   "dependencies": {
-    "@img/sharp-darwin-arm64": "^0.33.1",
     "@zxing/library": "^0.20.0",
     "axios": "^1.5.1",
     "barcode4nodejs": "^9.6.30",
@@ -26,5 +26,9 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
+  },
+  "optionalDependencies": {
+    "@img/sharp-darwin-arm64": "^0.33.1",
+    "@img/sharp-linux-x64": "^0.33.1"
   }
 }
