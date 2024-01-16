@@ -155,6 +155,11 @@ app.post(
   }
 );
 
+/*
+  This endpoint will get a JWT from AI Studio. 
+  This can be used to send outbound messages through the Vonage 
+  Dashboard application that is auto created by AI Studio.
+*/
 app.get("/studio/token", handleStudioAuth, async (req, res) => {
   try {
     const token = await generateStudioJwt();
@@ -170,6 +175,11 @@ app.get("/studio/token", handleStudioAuth, async (req, res) => {
   }
 });
 
+/*
+  This endpoint can be used to send Outbound Conversations via AI Studio Agents.
+  Anyone who answers to the message, would go through the "Outbound" Agent flow defined in the respective agent id.
+  Check the docs here: https://studio.docs.ai.vonage.com/whatsapp/get-started/triggering-an-outbound-whatsapp-virtual-agent
+*/
 app.post("/studio/whatsapp/send", handleStudioAuth, async (req, res) => {
   const { namespace, template, locale, to, components } = req.body;
 
