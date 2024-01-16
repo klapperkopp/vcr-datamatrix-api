@@ -1,137 +1,217 @@
 import express from "express";
-import DBR from "dynamsoft-node-barcode";
 import axios from "axios";
+import {
+  PORT,
+  APP_URL,
+  ZENDESK_BASE64_AUTH,
+  ZENDESK_BASE_URL,
+  AI_STUDIO_OUTBOUND_API_URL,
+  AI_STUDIO_AGENT_ID,
+  AI_STUDIO_API_KEY,
+  DEBUG,
+} from "./libs/constants.js";
+import { handleStudioAuth } from "./middleware/auth.js";
+import {
+  getImageStream,
+  uploadAttachmentFromUrl,
+} from "./libs/zendeskHelper.js";
+import { getBarcodeTasksDynamsoftNew } from "./libs/barcodeHelper.js";
 
+import { generateStudioJwt } from "./libs/aiStudio.js";
+import { handleErrorResponse } from "./libs/errors.js";
+
+// remove logging if debug is off
+if (DEBUG != "true") {
+  console.log = function () {};
+}
+
+// create express application
 const app = express();
 
-const PORT = process.env.NERU_APP_PORT || 3000;
-
-const ZENDESK_BASE_URL =
-  process.env.ZENDESK_BASE_URL || "https://vonage1143.zendesk.com";
-const ZENDESK_TOKEN = process.env.ZENDESK_TOKEN || "xxx";
-const ZENDESK_USERNAME = process.env.ZENDESK_USERNAME || "email@example.com";
-
+// mount general middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-function isJsonString(str) {
-  try {
-    JSON.parse(str);
-  } catch (e) {
-    return false;
-  }
-  return true;
-}
-
+// BASE WEBSITE
+// Mounts the base url just to show that the server is running when you visit it.
 app.get("/", (req, res) => {
+  res.send("Server is running.");
+});
+
+// METRICS AND HEALTH ROUTES
+// Mandatory urls for full VCR functionality.
+app.get(["/_/metrics", "/_/health"], (req, res) => {
   res.send("OK");
 });
 
-app.get("/_/metrics", (req, res) => {
-  res.send("OK");
+// MOUNT API ROUTES
+
+/*
+  POST /zendesk/upload
+
+  Authentication: Uses authentication header "x-api-key", 
+  which must be the value of the secret VCR environment variable "INTERNAL_API_KEY" 
+  OR with a valid Zendesk API Authentication.
+
+  Body Params:
+    * url: string
+    * description: Contains the url of the image to be uploaded to Zendesk
+  
+  Returns:
+    * json with Zendeks upload token
+
+  Response Examples:
+    - 201
+      {
+        "success": true,
+        "token": "zendeskUploadToken"
+      }
+    - 400
+      {
+        success: false, 
+        error: "Upload error. Try again."
+      }
+*/
+app.post("/zendesk/upload", handleStudioAuth, async (req, res) => {
+  const { url } = req.body;
+  console.log("url: ", url);
+
+  const imageDownloadResponse = await getImageStream(url);
+
+  // Try to upload the received Whatsapp image to Zendesk
+  const response = await uploadAttachmentFromUrl(url, imageDownloadResponse);
+  const filename = response?.data?.upload?.attachment?.file_name;
+
+  console.info(`[i] Getting barcode tasks for file ${filename}.`);
+  const { tasks, formattedTasks } = await getBarcodeTasksDynamsoftNew(url);
+
+  // Check if the response contains a Zendesk upload token
+  let token = response?.data?.upload?.token || null;
+
+  // Return error if no Zendesk upload token found
+  if (!token) {
+    return handleErrorResponse(null, "Upload error. Try again.", 400, res);
+  }
+
+  // Return Zendesk token if it was found
+  return res.status(201).json({ success: true, token, tasks, formattedTasks });
 });
 
-app.post("/imgscan", async (req, res) => {
-  // get json data from body that AI Studio has posted here
-  const { url, number, profileName, channel } = req.body;
+/*
+  POST /zendesk/createTicketWithImage
 
-  let results;
-  try {
-    // init barcode reader
-    let reader = await DBR.BarcodeReader.createInstance();
-    // decode barcode
-    results = await reader.decode(`${url}`);
-  } catch (e) {
-    console.error("Barcode reading error: ", e);
-    return res
-      .status(500)
-      .json({ error: "Barcode reading error: " + e.message });
-  }
+  Authentication: Uses authentication header "x-api-key", 
+  which must be the value of the secret VCR environment variable "INTERNAL_API_KEY" 
+  OR with a valid Zendesk API Authentication.
 
-  // get tasks and also filter them right away
-  let tasks;
-  try {
-    tasks = results
-      .filter((r) => isJsonString(r.barcodeText))
-      .map((r) => {
-        return JSON.parse(r.barcodeText);
-      });
-  } catch (e) {
-    console.error("Task filter error: ", e);
-    return res.status(500).json({ error: "Task filter error: " + e.message });
-  }
+  Params:
+    - Uses the format of Zendesk Ticket creation API: https://developer.zendesk.com/api-reference/ticketing/tickets/tickets/#create-ticket
+*/
+app.post(
+  "/zendesk/createTicketWithImage",
+  handleStudioAuth,
+  async (req, res) => {
+    try {
+      const { ticket } = req.body;
+      console.log("Ticket: ", ticket);
 
-  // only get tasks with the urls we want
-  if (tasks.length > 1) {
-    tasks = tasks.filter((task) => task.urls.length > 1);
-  }
-  console.log("tasks: ", tasks);
+      // Check if body has basic Zendesk Ticket format and attached file
+      if (!ticket || !ticket?.comment?.uploads[0]) {
+        return handleErrorResponse(
+          null,
+          "Zendesk ticket creation error. Please provide a valid ticket structure.",
+          400,
+          res
+        );
+      }
 
-  // fail request if no tasks detected, so AI Studio could properly respond to the user
-  if (tasks.length < 1 || tasks[0].length < 1)
-    return res.status(500).json({ error: "Could not recognize image." });
-
-  // prepare axios request data for Zendesk API call
-  // please note that you need to have the custom field for Tasks in Zendesk.
-  // If you don't have that, just remove the custom_fields section from the request and it will still work.
-  const data = JSON.stringify({
-    ticket: {
-      comment: {
-        body: `Kanal: ${channel}\nMobilnummer: ${number}\nRezept Url: ${url}`,
-      },
-      requester: {
-        locale_id: 8,
-        name: `${profileName || number}`,
-        email: `${number}_nomail@example.org`,
-      },
-      priority: "urgent",
-      subject: "E-Rezept Whatsapp",
-      custom_fields: [
+      // Create Zendesk ticket
+      const ticketResponse = await axios.post(
+        `${ZENDESK_BASE_URL}/api/v2/tickets`,
         {
-          id: 13284676275986,
-          value: `${tasks[0].urls.map((t) => {
-            return `Task ID: ${t.split("/")[1]}\nAccess Token: ${t
-              .split("/")[2]
-              .replace("$accept?ac=", "")}\n\n`;
-          })}`.replace(",", ""),
+          ticket,
         },
-      ],
-    },
-  });
+        {
+          headers: {
+            Authorization: `Basic ${ZENDESK_BASE64_AUTH}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-  // preparing Zendesk API Call headers
-  var config = {
-    method: "POST",
-    url: `${ZENDESK_BASE_URL}"/api/v2/tickets"`,
-    headers: {
-      "Content-Type": "application/json",
-    },
-    auth: {
-      username: `${ZENDESK_USERNAME}/token`,
-      password: `${ZENDESK_TOKEN}`,
-    },
-    data: data,
-  };
+      console.info(
+        `[i] Zendesk ticket creation status: ${ticketResponse.status}`
+      );
+      console.info(
+        "[i] Zendesk ticket ID: ",
+        ticketResponse?.data?.ticket?.id || null
+      );
 
-  // call Zendesk API
-  let zendeskData;
-  try {
-    const response = await axios(config);
-    zendeskData = response.data;
-    console.log("Zendesk response: ", JSON.stringify(zendeskData));
-  } catch (e) {
-    console.log("Axios request error: ", e);
+      // Return the direct response from Zendesk API without any additions
+      return res.status(ticketResponse.status).json(ticketResponse.data);
+    } catch (e) {
+      handleErrorResponse(e, "Ticket creation error", 400, res);
+    }
   }
+);
 
-  // returning Zendesk ticket info and QR scan results to whoever calls the API (e.g. AI Studio)
-  // you could make use of it in AI Studio to tell the user his Zendesk Ticket ID for example
-  return res.json({
-    foundTasks: tasks,
-    zendeskData,
-  });
+/*
+  This endpoint will get a JWT from AI Studio. 
+  This can be used to send outbound messages through the Vonage 
+  Dashboard application that is auto created by AI Studio.
+*/
+app.get("/studio/token", handleStudioAuth, async (req, res) => {
+  try {
+    const token = await generateStudioJwt();
+
+    if (!token) {
+      return res.status(400).json({ success: false, error: "No token found." });
+    }
+
+    // return token
+    return res.json({ success: true, token });
+  } catch (e) {
+    handleErrorResponse(e, "Token generation error", 400, res);
+  }
 });
 
-// run the server
+/*
+  This endpoint can be used to send Outbound Conversations via AI Studio Agents.
+  Anyone who answers to the message, would go through the "Outbound" Agent flow defined in the respective agent id.
+  Check the docs here: https://studio.docs.ai.vonage.com/whatsapp/get-started/triggering-an-outbound-whatsapp-virtual-agent
+*/
+app.post("/studio/whatsapp/send", handleStudioAuth, async (req, res) => {
+  const { namespace, template, locale, to, components } = req.body;
+
+  try {
+    const { data } = await axios.post(
+      AI_STUDIO_OUTBOUND_API_URL,
+      {
+        namespace,
+        template,
+        locale,
+        agent_id: AI_STUDIO_AGENT_ID,
+        to,
+        channel: "whatsapp",
+        components,
+      },
+      {
+        headers: {
+          "X-Vgai-Key": AI_STUDIO_API_KEY,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log("Got Studio Outbound API response: ", data);
+
+    return res.json({ success: true, data });
+  } catch (e) {
+    return handleErrorResponse(e, "Message send error", 400, res);
+  }
+});
+
+// Run the server
 app.listen(PORT, () => {
-  console.log("Server running on http://localhost:", PORT);
+  console.info(`[i] Server running on: ${APP_URL}`);
+  console.info(`[i] Local url: http://localhost:${PORT}`);
 });

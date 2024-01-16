@@ -8,7 +8,6 @@ This app is running a nodejs server (optionally on Vonage Cloud Runtime (VCR)) a
 - A Whatsapp Business API Account created through the [External Accounts section](https://dashboard.nexmo.com/messages/social-channels) of the Vonage Developer Dashboard
 - A Zendesk Instance ([Get a Demo Account here](https://www.zendesk.de/register/#step-1)) and the API Token
 - Vonage Cloud Runtime CLI (optional)
-- ngrok or similar for local testing (optional)
 
 ## Zendesk Setup
 
@@ -32,7 +31,7 @@ This app is running a nodejs server (optionally on Vonage Cloud Runtime (VCR)) a
 2. Create a Vonage application through the VCR CLI with `neru app create --name "your_app_name"` and note down the app ID
 3. Run `cp vcr.yaml.example vcr.yaml` and fill in the previously noted app ID as well as the Environment variables that are not secrets in the new vcr.yaml file
 4. Run `neru configure --app-id your_app_id`
-5. Run `neru secrets create --name ZENDESK_TOKEN --value your_zendesk_api_token` to securely store your Zendesk Token as a secret in VCR
+5. Run `neru secrets create --name ZENDESK_TOKEN --value your_zendesk_api_token` to securely store your Zendesk Token as a secret in VCR. Also create all otehr secrets from the vcr.yaml.example like this.
 6. Run `npm install`
 
 ### VCR - Run in Debug
