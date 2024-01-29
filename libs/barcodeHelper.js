@@ -72,13 +72,13 @@ export const getBarcodeTasksDynamsoftNew = async (barcodeUrl) => {
       console.log("formattedTasks: ", formattedTasks);
     } catch (e) {
       console.error("Task filter error: ", e);
-      return;
+      return { tasks: [], formattedTasks: "" };
     }
 
     return { tasks, formattedTasks };
   } catch (e) {
     console.error("Error: ", e.message);
-    return;
+    return { tasks: [], formattedTasks: "" };
   }
 };
 

@@ -54,7 +54,7 @@ export async function uploadAttachmentFromUrl(
 ) {
   try {
     if (!imageDownloadResponse) {
-      imageDownloadResponse = await downloadFile(url);
+      imageDownloadResponse = await getImageStream(url);
     }
 
     const { contentLength, contentType, filename } = await getImageStreamInfo(
