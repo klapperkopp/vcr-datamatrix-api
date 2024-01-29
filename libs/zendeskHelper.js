@@ -2,7 +2,6 @@ import mime from "mime";
 import { ZENDESK_BASE64_AUTH, ZENDESK_BASE_URL } from "./constants.js";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
-import { downloadFile } from "./imageHelper.js";
 
 export async function getImageStream(url) {
   try {
@@ -61,9 +60,9 @@ export async function uploadAttachmentFromUrl(
       imageDownloadResponse
     );
 
-    console.log("contentType: ", contentType);
-    console.log("contentLength: ", contentLength);
-    console.log("filename: ", filename);
+    console.info("contentType: ", contentType);
+    console.info("contentLength: ", contentLength);
+    console.info("filename: ", filename);
 
     const uploadResponse = await axios({
       method: "post",

@@ -74,7 +74,7 @@ app.get(["/_/metrics", "/_/health"], (req, res) => {
 */
 app.post("/zendesk/upload", handleStudioAuth, async (req, res) => {
   const { url } = req.body;
-  console.log("Processing Image Url: ", url);
+  console.info("Processing Image Url: ", url);
 
   const imageDownloadResponse = await getImageStream(url);
 
