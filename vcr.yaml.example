@@ -4,7 +4,7 @@ instance:
   name: dev
   runtime: nodejs16
   region: aws.euw1
-  application-id: your_app_id
+  application-id: <your_app_id>
   capabilities:
     - messages-v1
   environment:
@@ -41,6 +41,7 @@ instance:
     - start
   build-script: ./build.sh
 debug:
+  application-id: <your_debug_app_id>
   name: vcr-datamatrix-api-debug
   entrypoint:
     - npm

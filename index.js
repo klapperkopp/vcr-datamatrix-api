@@ -74,7 +74,7 @@ app.get(["/_/metrics", "/_/health"], (req, res) => {
 */
 app.post("/zendesk/upload", handleStudioAuth, async (req, res) => {
   const { url } = req.body;
-  console.log("url: ", url);
+  console.info("Processing Image Url: ", url);
 
   const imageDownloadResponse = await getImageStream(url);
 
@@ -156,6 +156,98 @@ app.post(
 );
 
 /*
+  POST /zendesk/addUserMessageToTicket
+
+  Authentication: Uses authentication header "x-api-key", 
+  which must be the value of the secret VCR environment variable "INTERNAL_API_KEY" 
+  OR with a valid Zendesk API Authentication.
+
+  Params:
+    - message
+    - from
+    - profileName
+    - ticketId
+*/
+app.post(
+  "/zendesk/addUserMessageToTicket",
+  handleStudioAuth,
+  async (req, res) => {
+    try {
+      let { message, ticketId, profileName, phone } = req.body;
+
+      if (!message || !phone || !ticketId || !profileName) {
+        throw new Error(
+          "Please provide a valid phone, message, ticketId, profileName."
+        );
+      }
+
+      // check if user owns ticket
+      const searchUserTickets = await axios.get(
+        `${ZENDESK_BASE_URL}/api/v2/search.json?query=type:ticket&phone:${phone}&include=tickets(users)`,
+        {
+          headers: {
+            Authorization: `Basic ${ZENDESK_BASE64_AUTH}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log(
+        "searchUserTickets: ",
+        JSON.stringify(searchUserTickets.data.results[0])
+      );
+
+      let foundUserTicket = searchUserTickets?.data?.results.find(
+        (ticket) => ticket.id == ticketId
+      );
+
+      console.log("foundUserTicket: ", JSON.stringify(foundUserTicket));
+
+      if (foundUserTicket) {
+        let authorId = foundUserTicket.requester_id;
+        console.log("requesterId: ", requesterId);
+        // update ticket if it belongs to user
+        const updateTicketResponse = await axios.put(
+          `${ZENDESK_BASE_URL}/api/v2/tickets/${ticketId}`,
+          {
+            ticket: {
+              comment: {
+                body: `${message}`,
+                author_id: authorId,
+              },
+              via: {
+                channel: "mobile",
+                source: {
+                  rel: "mobile",
+                  from: { phone, profileName },
+                  to: {},
+                },
+              },
+            },
+          },
+          {
+            headers: {
+              Authorization: `Basic ${ZENDESK_BASE64_AUTH}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        return res
+          .status(updateTicketResponse.status)
+          .json(updateTicketResponse.data);
+      } else {
+        return res
+          .status(401)
+          .json({ error: "Ticket does not belong to this user." });
+      }
+    } catch (e) {
+      handleErrorResponse(e, "Ticket creation error", 400, res);
+    }
+  }
+);
+
+/*
   This endpoint will get a JWT from AI Studio. 
   This can be used to send outbound messages through the Vonage 
   Dashboard application that is auto created by AI Studio.
@@ -181,27 +273,44 @@ app.get("/studio/token", handleStudioAuth, async (req, res) => {
   Check the docs here: https://studio.docs.ai.vonage.com/whatsapp/get-started/triggering-an-outbound-whatsapp-virtual-agent
 */
 app.post("/studio/whatsapp/send", handleStudioAuth, async (req, res) => {
-  const { namespace, template, locale, to, components } = req.body;
+  console.debug("Received request for outbound studio message: ", req.body);
+  let { namespace, template, locale, to, components, session_parameters } =
+    req.body;
+
+  // we have to clean out all line breaks because Whatsapp tempaltes do not support them.
+  let bodyComponent = components.find((c) => c.type.toUpperCase() === "BODY");
+
+  let cleanedParameters = bodyComponent.parameters.map((p) => {
+    return { ...p, text: p.text.replace(/\n/g, " ") };
+  });
+
+  let otherComponents = components.filter(
+    (c) => c.type.toUpperCase() !== "BODY"
+  );
+
+  components = [
+    ...otherComponents,
+    { type: "body", parameters: cleanedParameters },
+  ];
+
+  let body = {
+    namespace,
+    template,
+    locale,
+    agent_id: AI_STUDIO_AGENT_ID,
+    to,
+    channel: "whatsapp",
+    components,
+    session_parameters,
+  };
 
   try {
-    const { data } = await axios.post(
-      AI_STUDIO_OUTBOUND_API_URL,
-      {
-        namespace,
-        template,
-        locale,
-        agent_id: AI_STUDIO_AGENT_ID,
-        to,
-        channel: "whatsapp",
-        components,
+    const { data } = await axios.post(AI_STUDIO_OUTBOUND_API_URL, body, {
+      headers: {
+        "X-Vgai-Key": AI_STUDIO_API_KEY,
+        "Content-Type": "application/json",
       },
-      {
-        headers: {
-          "X-Vgai-Key": AI_STUDIO_API_KEY,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    });
     console.log("Got Studio Outbound API response: ", data);
 
     return res.json({ success: true, data });
