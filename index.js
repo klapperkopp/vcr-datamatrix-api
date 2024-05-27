@@ -205,7 +205,7 @@ app.post(
 
       if (foundUserTicket) {
         let authorId = foundUserTicket.requester_id;
-        console.log("requesterId: ", requesterId);
+        console.log("authorId: ", authorId);
         // update ticket if it belongs to user
         const updateTicketResponse = await axios.put(
           `${ZENDESK_BASE_URL}/api/v2/tickets/${ticketId}`,
