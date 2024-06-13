@@ -192,22 +192,16 @@ app.post(
         }
       );
 
-      console.log(
-        "searchUserTickets: ",
-        JSON.stringify(searchUserTickets.data.results[0])
-      );
-
       // check if the zendesk tickets wuth this users phone number actually contain the ticket number he entered in whatsapp (meaning he owns the ticket)
       let foundUserTicket = searchUserTickets?.data?.results.find(
         (ticket) => ticket.id == ticketId
       );
 
-      console.log("foundUserTicket: ", JSON.stringify(foundUserTicket));
-
+      // continue if the user owns the ticket id, otherwise return error that can be handled by ai studio response
       if (foundUserTicket) {
         let authorId = foundUserTicket.requester_id;
-        console.log("authorId: ", authorId);
-        // update ticket if it belongs to user
+
+        // update ticket with user message if it belongs to user
         const updateTicketResponse = await axios.put(
           `${ZENDESK_BASE_URL}/api/v2/tickets/${ticketId}`,
           {
@@ -249,6 +243,11 @@ app.post(
 );
 
 /*
+  POST /studio/token
+
+  Authentication: Uses authentication header "x-api-key", 
+  which must be the value of the secret VCR environment variable "INTERNAL_API_KEY"
+
   This endpoint will get a JWT from AI Studio. 
   This can be used to send outbound messages through the Vonage 
   Dashboard application that is auto created by AI Studio.
