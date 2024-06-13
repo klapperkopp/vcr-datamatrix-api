@@ -197,6 +197,7 @@ app.post(
         JSON.stringify(searchUserTickets.data.results[0])
       );
 
+      // check if the zendesk tickets wuth this users phone number actually contain the ticket number he entered in whatsapp (meaning he owns the ticket)
       let foundUserTicket = searchUserTickets?.data?.results.find(
         (ticket) => ticket.id == ticketId
       );
